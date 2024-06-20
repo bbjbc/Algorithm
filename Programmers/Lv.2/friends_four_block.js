@@ -6,6 +6,7 @@
 // removed는 제거된 블록이 있는지 확인하는 변수임.
 // removeArr은 제거할 블록을 표시하는 배열임. → 제거할 블록은 true로 표시함.
 
+// 1. 리팩토링 전
 function solution(m, n, board) {
   let answer = 0;
   let arr = board.map((b) => b.split(""));
@@ -49,6 +50,65 @@ function solution(m, n, board) {
   }
 
   return answer;
+}
+
+// 2. 리팩토링 후
+function solution(m, n, board) {
+  let answer = 0;
+  let arr = board.map((b) => b.split(""));
+
+  while (true) {
+    let removeArr = getRemoveArray(m, n, arr);
+    let removed = removeBlocks(m, n, arr, removeArr);
+    if (!removed) break;
+    answer += removed;
+  }
+
+  return answer;
+}
+
+function getRemoveArray(m, n, arr) {
+  let removeArr = Array.from({ length: m }, () => Array(n).fill(false));
+
+  for (let i = 0; i < m - 1; i++) {
+    for (let j = 0; j < n - 1; j++) {
+      if (
+        arr[i][j] !== "" &&
+        arr[i][j] === arr[i][j + 1] &&
+        arr[i][j] === arr[i + 1][j] &&
+        arr[i][j] === arr[i + 1][j + 1]
+      ) {
+        removeMarking(removeArr, i, j);
+      }
+    }
+  }
+
+  return removeArr;
+}
+
+function removeMarking(removeArr, i, j) {
+  removeArr[i][j] = true;
+  removeArr[i][j + 1] = true;
+  removeArr[i + 1][j] = true;
+  removeArr[i + 1][j + 1] = true;
+}
+
+function removeBlocks(m, n, arr, removeArr) {
+  let removeCount = 0;
+
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      if (removeArr[i][j]) {
+        removeCount++;
+        for (let k = i; k > 0; k--) {
+          arr[k][j] = arr[k - 1][j];
+        }
+        arr[0][j] = "";
+      }
+    }
+  }
+
+  return removeCount;
 }
 
 console.log(solution(4, 5, ["CCBDE", "AAADE", "AAABF", "CCBBF"])); // 14
